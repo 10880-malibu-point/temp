@@ -1,26 +1,17 @@
 #!/usr/bin/env bash
-# sys0: install + start syncthing, join the mesh
+# sys0: syncthing already installed - just enable, start, report
 set -e
 
-# 1 - install if missing
-if ! command -v syncthing >/dev/null 2>&1; then
-  sudo apt-get update -y
-  sudo apt-get install -y syncthing
-fi
-
-# 2 - keep it alive after logout / reboot
 sudo loginctl enable-linger "$USER"
-
-# 3 - start the user service
 systemctl --user enable --now syncthing.service
 
-# 4 - wait for the API to come up
+# wait for the API to come up
 for i in $(seq 1 30); do
   curl -s -o /dev/null http://127.0.0.1:8384 && break
   sleep 2
 done
 
-# 5 - show status
+# report
 K=$(grep -oP '(?<=<apikey>)[^<]+' ~/.config/syncthing/config.xml 2>/dev/null || true)
 H="X-API-Key: ${K}"
 
