@@ -5,12 +5,12 @@ title SSH server setup - one shot
 :: ---------------------------------------------------------------
 :: 1. Elevate to Administrator (UAC prompt appears once)
 :: ---------------------------------------------------------------
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-  echo Requesting Administrator rights...
-  powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
-  exit /b
-)
+powershell -NoProfile -Command "if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { exit 0 } else { exit 1 }"
+if %errorlevel% equ 0 goto ADMINTOK
+echo Requesting Administrator rights...
+powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+exit /b
+:ADMINTOK
 
 echo ============================================
 echo  SSH server setup - one shot
